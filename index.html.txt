@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Login Zacrash</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #0a0f1a, #1a0033);
+      font-family: Arial, sans-serif;
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+    }
+    .card {
+      max-width: 400px;
+      margin: auto;
+      background: rgba(20,20,40,0.9);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 0 20px #4b00ff;
+    }
+    h2 { text-align: center; color: #00c3ff; }
+    input {
+      width: 100%; padding: 10px; margin: 10px 0;
+      border-radius: 8px; border: none; outline: none;
+      background: #111; color: #fff;
+      box-shadow: inset 0 0 8px #4b00ff;
+    }
+    .btn {
+      display: block; width: 100%; padding: 12px; margin-top: 10px;
+      background: linear-gradient(90deg,#00c3ff,#4b00ff);
+      border: none; border-radius: 8px; color: #fff;
+      font-size: 16px; cursor: pointer;
+    }
+    .btn:hover { opacity: 0.8; }
+    .hidden { display: none; }
+    .bug-menu, .sender-menu { display: flex; gap: 15px; overflow-x: auto; padding: 10px 0; cursor: grab; }
+    .bug-card, .sender-card {
+      position: relative; flex: 0 0 auto;
+      background: #222; padding: 25px; border-radius: 8px;
+      min-width: 160px; min-height: 100px; text-align: center;
+      font-size: 16px; cursor: pointer;
+      box-shadow: 0 0 12px #00c3ff; transition: 0.3s;
+    }
+    .bug-card svg.shield {
+      position: absolute; top: 5px; left: 8px;
+      width: 20px; height: 24px; fill: #00ff00;
+      filter: drop-shadow(0 0 4px #00ff00);
+    }
+    .bug-card.selected, .sender-card.selected {
+      background: #25D366; color: #111; box-shadow: 0 0 15px #25D366;
+    }
+    .overlay {
+      position: fixed; top:0; left:0; width:100%; height:100%;
+      background: rgba(0,0,0,0.8); display:none;
+      justify-content:center; align-items:center; flex-direction:column;
+      color:#0f0; font-size:20px;
+    }
+    .overlay.active { display:flex; }
+    .overlay .check { font-size:60px; animation:pulse 1s infinite; }
+    .exit-btn { margin-top:20px; padding:10px 20px; background:#0f0; color:#111; border:none; border-radius:8px; cursor:pointer; font-weight:bold; }
+    @keyframes pulse { 0%{transform:scale(1);}50%{transform:scale(1.2);}100%{transform:scale(1);} }
+  </style>
+</head>
+<body>
+  <!-- LOGIN CARD -->
+  <div class="card" id="loginCard">
+    <h2>Login Zacrash</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button class="btn" onclick="login()">LOGIN</button>
+  </div>
+
+  <!-- APP CARD -->
+  <div class="card hidden" id="appCard">
+    <h2>Zacrash</h2>
+    <label for="target">NOMOR TARGET</label>
+    <input type="text" id="target" placeholder="+62xxxxxxxxxx">
+
+    <label>PILIH BUG</label>
+    <div class="bug-menu" id="bugMenu">
+      <div class="bug-card"><svg class="shield" viewBox="0 0 24 24"><path d="M12 2L4 5v6c0 5.25 3.75 10.74 8 11.99 4.25-1.25 8-6.74 8-11.99V5l-8-3z"/></svg>Crash UI</div>
+      <div class="bug-card"><svg class="shield" viewBox="0 0 24 24"><path d="M12 2L4 5v6c0 5.25 3.75 10.74 8 11.99 4.25-1.25 8-6.74 8-11.99V5l-8-3z"/></svg>Invisible UI</div>
+      <div class="bug-card"><svg class="shield" viewBox="0 0 24 24"><path d="M12 2L4 5v6c0 5.25 3.75 10.74 8 11.99 4.25-1.25 8-6.74 8-11.99V5l-8-3z"/></svg>Delay Aman buat Nokos</div>
+      <div class="bug-card"><svg class="shield" viewBox="0 0 24 24"><path d="M12 2L4 5v6c0 5.25 3.75 10.74 8 11.99 4.25-1.25 8-6.74 8-11.99V5l-8-3z"/></svg>For Close</div>
+    </div>
+
+    <label>PILIH SENDER</label>
+    <div class="sender-menu">
+      <div class="sender-card">Global</div>
+      <div class="sender-card">Private</div>
+    </div>
+
+    <button class="btn" onclick="validateAndSend()">SEND BUG 🚀</button>
+  </div>
+
+  <!-- POPUP -->
+  <div class="overlay" id="overlay">
+    <div class="check">✅</div>
+    <div>Bug Terkirim</div>
+    <div>Bug berhasil dikirim ke target</div>
+    <div id="targetNumber"></div>
+    <button class="exit-btn" onclick="hideOverlay()">KELUAR</button>
+  </div>
+
+  <script>
+    // LOGIN FUNCTION
+    function login(){
+      const user=document.getElementById("username").value.trim();
+      const pass=document.getElementById("password").value.trim();
+      if(user==="zack" && pass==="1234"){ // contoh validasi
+        document.getElementById("loginCard").classList.add("hidden");
+        document.getElementById("appCard").classList.remove("hidden");
+      }else{
+        alert("❌ Username atau password salah!");
+      }
+    }
+
+    // pilih bug/sender
+    document.querySelectorAll(".bug-card, .sender-card").forEach(card=>{
+      card.addEventListener("click",()=>{
+        const group=card.classList.contains("bug-card")?".bug-card":".sender-card";
+        document.querySelectorAll(group).forEach(c=>c.classList.remove("selected"));
+        card.classList.add("selected");
+      });
+    });
+
+    // drag scroll bug menu
+    const bugMenu=document.getElementById("bugMenu");
+    let isDown=false,startX,scrollLeft;
+    bugMenu.addEventListener("mousedown",e=>{
+      isDown=true; startX=e.pageX-bugMenu.offsetLeft; scrollLeft=bugMenu.scrollLeft;
+    });
+    bugMenu.addEventListener("mouseleave",()=>isDown=false);
+    bugMenu.addEventListener("mouseup",()=>isDown=false);
+    bugMenu.addEventListener("mousemove",e=>{
+      if(!isDown) return;
+      e.preventDefault();
+      const x=e.pageX-bugMenu.offsetLeft;
+      const walk=(x-startX)*2;
+      bugMenu.scrollLeft=scrollLeft-walk;
+    });
+
+    // SEND BUG
+    function validateAndSend(){
+      const target=document.getElementById("target").value.trim();
+      const bugSelected=document.querySelector(".bug-card.selected");
+      const senderSelected=document.querySelector(".sender-card.selected");
+
+      if(!target){ alert("Nomor target belum diisi!"); return; }
+      if(!bugSelected){ alert("Pilih menu bug dulu!"); return; }
+      if(!senderSelected){ alert("Pilih sender dulu!"); return; }
+
+      document.getElementById("targetNumber").innerText=target;
+      document.getElementById("overlay").classList.add("active");
+    }
+    function hideOverlay(){ document.getElementById("overlay").classList.remove("active"); }
+  </script>
+</body>
